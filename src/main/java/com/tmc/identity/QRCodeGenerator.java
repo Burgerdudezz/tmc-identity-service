@@ -13,13 +13,11 @@ public class QRCodeGenerator {
         this.tokens = tokens;
     }
 
-    public GeneratedQR generate(int employeeId) {
+    public QRCode generateQRCode(int employeeId) {
         var employee = employees.findById(employeeId)
             .orElseThrow(() -> new IllegalArgumentException("Employee not found"));
         if (!employee.active()) throw new IllegalArgumentException("Employee is inactive");
         var expiresAt = Instant.now().plusSeconds(60);
-        return new GeneratedQR(tokens.issue(employee, expiresAt), expiresAt);
+        return new QRCode(tokens.issue(employee, expiresAt), expiresAt);
     }
-
-    public record GeneratedQR(String token, Instant expiresAt) {}
 }

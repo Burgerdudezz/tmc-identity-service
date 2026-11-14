@@ -25,7 +25,7 @@ public class IdentityController {
     public List<Employee> employees() { return employees.findAll(); }
 
     @PostMapping("/employees/{id}/qr")
-    public QRCodeGenerator.GeneratedQR generate(@PathVariable int id) { return generator.generate(id); }
+    public QRCode generate(@PathVariable int id) { return generator.generateQRCode(id); }
 
     @PostMapping("/validation")
     public QRCodeValidator.ValidationResult validate(@Valid @RequestBody ValidationRequest request) {
