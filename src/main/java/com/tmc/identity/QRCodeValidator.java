@@ -6,12 +6,12 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class QRCodeValidator {
-    private final EmployeeRepository employees;
+    private final ActiveEmployees activeEmployees;
     private final TokenCodec tokens;
     private final UsedTokenStore usedTokens;
 
-    public QRCodeValidator(EmployeeRepository employees, TokenCodec tokens, UsedTokenStore usedTokens) {
-        this.employees = employees;
+    public QRCodeValidator(ActiveEmployees activeEmployees, TokenCodec tokens, UsedTokenStore usedTokens) {
+        this.activeEmployees = activeEmployees;
         this.tokens = tokens;
         this.usedTokens = usedTokens;
     }
@@ -21,7 +21,7 @@ public class QRCodeValidator {
         if (credential == null) return ValidationResult.denied("Invalid QR code");
         if (isExpired(credential)) return ValidationResult.denied("QR code has expired");
 
-        var employee = findActiveEmployee(credential.employeeId()).orElse(null);
+        var employee = activeEmployees.find(credential.employeeId()).orElse(null);
         if (employee == null) return ValidationResult.denied("Employee is inactive");
         if (!isAllowedAtFactory(employee, credential, factoryId))
             return ValidationResult.denied("Employee is not allowed at this factory");
@@ -40,10 +40,6 @@ public class QRCodeValidator {
 
     private boolean isExpired(TokenCodec.Credential credential) {
         return !credential.expiresAt().isAfter(Instant.now());
-    }
-
-    private Optional<Employee> findActiveEmployee(int employeeId) {
-        return employees.findById(employeeId).filter(Employee::active);
     }
 
     private boolean isAllowedAtFactory(Employee employee, TokenCodec.Credential credential, int factoryId) {
